@@ -16,6 +16,8 @@
 coverage.*
 *.coverprofile
 profile.cov
+test.json
+junit-report.xml
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
@@ -24,9 +26,12 @@ profile.cov
 go.work
 go.work.sum
 
+# Build output
+bin/
+
 # env file
 .env
 
 # Editor/IDE
-# .idea/
-# .vscode/
+.idea/
+.vscode/
