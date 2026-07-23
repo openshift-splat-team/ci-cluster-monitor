@@ -15,7 +15,6 @@ import (
 
 	"k8s.io/klog/v2"
 
-	"github.com/nutanix-cloud-native/ci-cluster-monitor/internal/alerts"
 	"github.com/nutanix-cloud-native/ci-cluster-monitor/internal/config"
 	ghclient "github.com/nutanix-cloud-native/ci-cluster-monitor/internal/github"
 	"github.com/nutanix-cloud-native/ci-cluster-monitor/internal/monitor"
@@ -25,15 +24,14 @@ func main() {
 	klog.InitFlags(nil)
 	configPath := flag.String("config", "config/repos.yaml", "path to configuration file")
 	format := flag.String("format", "table", "output format: table, json")
-	notifySlack := flag.Bool("notify-slack", false, "send Slack notification for threshold violations")
 	flag.Parse()
 
-	exitCode := run(*configPath, *format, *notifySlack)
+	exitCode := run(*configPath, *format)
 	klog.Flush()
 	os.Exit(exitCode)
 }
 
-func run(configPath, format string, notifySlack bool) int {
+func run(configPath, format string) int {
 	token := os.Getenv("GITHUB_TOKEN")
 	if token == "" {
 		klog.Errorf("GITHUB_TOKEN environment variable is required")
@@ -63,16 +61,9 @@ func run(configPath, format string, notifySlack bool) int {
 		outputTable(reports)
 	}
 
-	if notifySlack {
-		webhookURL := os.Getenv("SLACK_WEBHOOK_URL")
-		if webhookURL == "" {
-			klog.Errorf("SLACK_WEBHOOK_URL environment variable is required when --notify-slack is set")
-			return 1
-		}
-		if err := alerts.SendSlackReport(webhookURL, reports, cfg.Thresholds); err != nil {
-			klog.Errorf("Failed to send Slack notification: %v", err)
-			return 1
-		}
+	if hasFlaggedPRs(reports) {
+		klog.Infof("Threshold violations detected")
+		return 1
 	}
 
 	return 0
@@ -135,6 +126,18 @@ func formatDuration(d time.Duration) string {
 	default:
 		return fmt.Sprintf("%dd ago", int(hours/24))
 	}
+}
+
+func hasFlaggedPRs(reports []monitor.RepoReport) bool {
+	for _, report := range reports {
+		for i := range report.PRs {
+			switch report.PRs[i].Severity {
+			case monitor.SeverityCritical, monitor.SeverityStale:
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func printSummary(reports []monitor.RepoReport) {
