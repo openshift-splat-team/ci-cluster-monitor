@@ -1,4 +1,4 @@
-# Copyright 2025 Nutanix. All rights reserved.
+# Copyright 2025.
 # SPDX-License-Identifier: Apache-2.0
 
 name: checks
@@ -46,6 +46,6 @@ jobs:
           go-version-file: go.mod
 
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v7
         with:
           version: v2.2.1
