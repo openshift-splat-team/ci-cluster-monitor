@@ -81,7 +81,7 @@ func (c *Client) ListOpenPRs(ctx context.Context, owner, repo string) ([]PullReq
 func (c *Client) GetLatestWorkflowRunStatus(
 	ctx context.Context,
 	owner, repo string,
-	pr PullRequest,
+	pr *PullRequest,
 	workflows []string,
 ) ([]WorkflowRunStatus, error) {
 	var statuses []WorkflowRunStatus

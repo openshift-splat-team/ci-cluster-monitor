@@ -30,6 +30,7 @@ func (c *Client) logRateLimit(resp *github.Response) {
 	}
 	remaining := resp.Rate.Remaining
 	if remaining < 100 {
-		klog.Warningf("GitHub API rate limit low, remaining=%d, limit=%d, reset=%s", remaining, resp.Rate.Limit, resp.Rate.Reset.Time)
+		klog.Warningf("GitHub API rate limit low, remaining=%d, limit=%d, reset=%s",
+			remaining, resp.Rate.Limit, resp.Rate.Reset.Time)
 	}
 }

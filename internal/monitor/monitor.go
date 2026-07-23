@@ -45,13 +45,14 @@ func (m *Monitor) Run(ctx context.Context) ([]RepoReport, error) {
 			FetchedAt: now,
 		}
 
-		for _, pr := range prs {
-			if m.shouldExclude(pr) {
+		for i := range prs {
+			if m.shouldExclude(&prs[i]) {
 				continue
 			}
 
-			ciStatus := m.resolveCIStatus(ctx, repo, pr)
+			ciStatus := m.resolveCIStatus(ctx, repo, &prs[i])
 
+			pr := &prs[i]
 			metrics := PRMetrics{
 				Repo:            repo.FullName(),
 				Number:          pr.Number,
@@ -66,7 +67,7 @@ func (m *Monitor) Run(ctx context.Context) ([]RepoReport, error) {
 				CIStatus:        ciStatus,
 				HTMLURL:         pr.HTMLURL,
 			}
-			metrics.Severity = classifyPR(metrics, m.cfg.Thresholds)
+			metrics.Severity = classifyPR(&metrics, m.cfg.Thresholds)
 			report.PRs = append(report.PRs, metrics)
 		}
 
@@ -77,7 +78,7 @@ func (m *Monitor) Run(ctx context.Context) ([]RepoReport, error) {
 	return reports, nil
 }
 
-func (m *Monitor) shouldExclude(pr github.PullRequest) bool {
+func (m *Monitor) shouldExclude(pr *github.PullRequest) bool {
 	if m.cfg.Filters.ExcludeDrafts && pr.IsDraft {
 		return true
 	}
@@ -98,7 +99,7 @@ func (m *Monitor) shouldExclude(pr github.PullRequest) bool {
 func (m *Monitor) resolveCIStatus(
 	ctx context.Context,
 	repo config.Repository,
-	pr github.PullRequest,
+	pr *github.PullRequest,
 ) string {
 	if len(repo.Workflows) == 0 {
 		return "no-workflows"
@@ -140,7 +141,7 @@ func (m *Monitor) resolveCIStatus(
 	}
 }
 
-func classifyPR(pr PRMetrics, thresholds config.Thresholds) Severity {
+func classifyPR(pr *PRMetrics, thresholds config.Thresholds) Severity {
 	ageDays := pr.Age.Hours() / 24
 	staleDays := pr.SinceLastUpdate.Hours() / 24
 

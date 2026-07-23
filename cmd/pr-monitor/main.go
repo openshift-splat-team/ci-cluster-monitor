@@ -27,18 +27,23 @@ func main() {
 	format := flag.String("format", "table", "output format: table, json")
 	notifySlack := flag.Bool("notify-slack", false, "send Slack notification for threshold violations")
 	flag.Parse()
-	defer klog.Flush()
 
+	exitCode := run(*configPath, *format, *notifySlack)
+	klog.Flush()
+	os.Exit(exitCode)
+}
+
+func run(configPath, format string, notifySlack bool) int {
 	token := os.Getenv("GITHUB_TOKEN")
 	if token == "" {
 		klog.Errorf("GITHUB_TOKEN environment variable is required")
-		os.Exit(1)
+		return 1
 	}
 
-	cfg, err := config.Load(*configPath)
+	cfg, err := config.Load(configPath)
 	if err != nil {
 		klog.Errorf("Failed to load configuration: %v", err)
-		os.Exit(1)
+		return 1
 	}
 
 	ctx := context.Background()
@@ -48,27 +53,29 @@ func main() {
 	reports, err := mon.Run(ctx)
 	if err != nil {
 		klog.Errorf("Failed to run monitor: %v", err)
-		os.Exit(1)
+		return 1
 	}
 
-	switch *format {
+	switch format {
 	case "json":
 		outputJSON(reports)
 	default:
 		outputTable(reports)
 	}
 
-	if *notifySlack {
+	if notifySlack {
 		webhookURL := os.Getenv("SLACK_WEBHOOK_URL")
 		if webhookURL == "" {
 			klog.Errorf("SLACK_WEBHOOK_URL environment variable is required when --notify-slack is set")
-			os.Exit(1)
+			return 1
 		}
 		if err := alerts.SendSlackReport(webhookURL, reports, cfg.Thresholds); err != nil {
 			klog.Errorf("Failed to send Slack notification: %v", err)
-			os.Exit(1)
+			return 1
 		}
 	}
+
+	return 0
 }
 
 func outputTable(reports []monitor.RepoReport) {
@@ -84,7 +91,8 @@ func outputTable(reports []monitor.RepoReport) {
 		fmt.Fprintln(w, "PR\tTITLE\tAUTHOR\tAGE\tLAST UPDATE\tCI\tSEVERITY")
 		fmt.Fprintln(w, "--\t-----\t------\t---\t-----------\t--\t--------")
 
-		for _, pr := range report.PRs {
+		for i := range report.PRs {
+			pr := &report.PRs[i]
 			ageDays := fmt.Sprintf("%.1fd", pr.Age.Hours()/24)
 			lastUpdate := formatDuration(pr.SinceLastUpdate)
 			title := pr.Title
@@ -132,9 +140,9 @@ func formatDuration(d time.Duration) string {
 func printSummary(reports []monitor.RepoReport) {
 	var total, warning, critical, stale int
 	for _, report := range reports {
-		for _, pr := range report.PRs {
+		for i := range report.PRs {
 			total++
-			switch pr.Severity {
+			switch report.PRs[i].Severity {
 			case monitor.SeverityWarning:
 				warning++
 			case monitor.SeverityCritical:

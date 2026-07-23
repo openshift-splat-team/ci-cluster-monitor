@@ -46,19 +46,19 @@ func SendSlackReport(
 	return postToSlack(webhookURL, msg)
 }
 
-func collectFlaggedPRs(reports []monitor.RepoReport) []monitor.PRMetrics {
-	var flagged []monitor.PRMetrics
-	for _, report := range reports {
-		for _, pr := range report.PRs {
-			if pr.Severity != monitor.SeverityNormal {
-				flagged = append(flagged, pr)
+func collectFlaggedPRs(reports []monitor.RepoReport) []*monitor.PRMetrics {
+	var flagged []*monitor.PRMetrics
+	for i := range reports {
+		for j := range reports[i].PRs {
+			if reports[i].PRs[j].Severity != monitor.SeverityNormal {
+				flagged = append(flagged, &reports[i].PRs[j])
 			}
 		}
 	}
 	return flagged
 }
 
-func buildSlackMessage(prs []monitor.PRMetrics, thresholds config.Thresholds) slackMessage {
+func buildSlackMessage(prs []*monitor.PRMetrics, thresholds config.Thresholds) slackMessage {
 	var lines []string
 	lines = append(lines, fmt.Sprintf(
 		"*PR Age Monitor Report* (%s)\nThresholds: warning >%dd, critical >%dd, stale >%dd since update",
@@ -75,13 +75,13 @@ func buildSlackMessage(prs []monitor.PRMetrics, thresholds config.Thresholds) sl
 			lines = append(lines, fmt.Sprintf("\n*%s*", currentRepo))
 		}
 
-		severityIcon := severityIcon(pr.Severity)
+		sIcon := severityIcon(pr.Severity)
 		ageDays := int(pr.Age.Hours() / 24)
 		ciIcon := ciStatusIcon(pr.CIStatus)
 
 		lines = append(lines, fmt.Sprintf(
 			"%s <%s|#%d> %s (%s, %dd old, CI: %s)",
-			severityIcon,
+			sIcon,
 			pr.HTMLURL,
 			pr.Number,
 			truncate(pr.Title, 60),
@@ -138,25 +138,19 @@ func truncate(s string, maxLen int) string {
 }
 
 func postToSlack(webhookURL string, msg slackMessage) error {
-	body, err := json.Marshal(msg)
-	if err != nil {
-		return fmt.Errorf("marshaling Slack message: %w", err)
-	}
+	body, _ := json.Marshal(msg)
 
-	resp, err := http.Post(webhookURL, "application/json", bytes.NewReader(body)) //nolint:gosec
+	//nolint:gosec // webhook URL is from trusted config
+	resp, err := http.Post(webhookURL, "application/json", bytes.NewReader(body))
 	if err != nil {
 		return fmt.Errorf("posting to Slack: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Slack returned status %d", resp.StatusCode)
+		return fmt.Errorf("slack returned status %d", resp.StatusCode)
 	}
 
-	klog.Infof("Slack notification sent, flagged_prs=%d", len(collectFlaggedPRsFromMsg(msg)))
+	klog.Infof("Slack notification sent, flagged_prs=%d", len(msg.Blocks))
 	return nil
-}
-
-func collectFlaggedPRsFromMsg(msg slackMessage) []slackBlock {
-	return msg.Blocks
 }

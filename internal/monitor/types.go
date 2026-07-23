@@ -39,6 +39,6 @@ type RepoReport struct {
 	FetchedAt time.Time   `json:"fetched_at"`
 }
 
-func (r RepoReport) FullName() string {
+func (r *RepoReport) FullName() string {
 	return r.Owner + "/" + r.Repo
 }

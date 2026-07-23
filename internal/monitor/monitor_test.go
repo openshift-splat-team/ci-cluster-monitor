@@ -73,7 +73,7 @@ func TestClassifyPR(t *testing.T) {
 				Age:             tt.age,
 				SinceLastUpdate: tt.lastUpd,
 			}
-			got := classifyPR(pr, thresholds)
+			got := classifyPR(&pr, thresholds)
 			if got != tt.expected {
 				t.Errorf("classifyPR() = %v, want %v", got, tt.expected)
 			}
