@@ -1,6 +1,3 @@
-// Copyright 2025.
-// SPDX-License-Identifier: Apache-2.0
-
 package main
 
 import (
@@ -9,7 +6,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"text/tabwriter"
 	"time"
 
@@ -44,7 +43,9 @@ func run(configPath, format string) int {
 		return 1
 	}
 
-	ctx := context.Background()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
 	client := ghclient.NewClient(ctx, token)
 	mon := monitor.New(client, cfg)
 
