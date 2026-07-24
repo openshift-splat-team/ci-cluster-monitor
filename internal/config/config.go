@@ -76,6 +76,9 @@ func (c *Config) validate() error {
 			return fmt.Errorf("repository at index %d has empty owner or name", i)
 		}
 	}
+	if c.Thresholds.WarningAgeDays <= 0 || c.Thresholds.CriticalAgeDays <= 0 || c.Thresholds.StaleUpdateDays <= 0 {
+		return fmt.Errorf("all threshold values must be positive")
+	}
 	if c.Thresholds.WarningAgeDays >= c.Thresholds.CriticalAgeDays {
 		return fmt.Errorf("warning_age_days (%d) must be less than critical_age_days (%d)",
 			c.Thresholds.WarningAgeDays, c.Thresholds.CriticalAgeDays)

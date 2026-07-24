@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"context"
+	"fmt"
 	"slices"
 	"time"
 
@@ -32,8 +33,7 @@ func (m *Monitor) Run(ctx context.Context) ([]RepoReport, error) {
 
 		prs, err := m.client.ListOpenPRs(ctx, repo.Owner, repo.Name)
 		if err != nil {
-			klog.Errorf("Failed to fetch PRs for %s: %v", repo.FullName(), err)
-			continue
+			return nil, fmt.Errorf("fetching PRs for %s: %w", repo.FullName(), err)
 		}
 
 		report := RepoReport{
@@ -110,18 +110,22 @@ func (m *Monitor) resolveCIStatus(
 
 	hasFailure := false
 	hasRunning := false
+	hasUnavailable := false
 	allNoRuns := true
 
 	for _, s := range statuses {
 		if s.Status != "no-runs" {
 			allNoRuns = false
 		}
-		switch {
-		case s.Status == "completed" && s.Conclusion == "failure":
-			hasFailure = true
-		case s.Status == "completed" && s.Conclusion == "action_required":
-			hasFailure = true
-		case s.Status == "in_progress" || s.Status == "queued":
+		switch s.Status {
+		case "unavailable":
+			hasUnavailable = true
+		case "completed":
+			switch s.Conclusion {
+			case "failure", "action_required", "cancelled", "timed_out", "stale", "startup_failure":
+				hasFailure = true
+			}
+		case "in_progress", "queued", "waiting", "requested", "pending":
 			hasRunning = true
 		}
 	}
@@ -131,6 +135,8 @@ func (m *Monitor) resolveCIStatus(
 		return "no-runs"
 	case hasFailure:
 		return "failing"
+	case hasUnavailable:
+		return "unavailable"
 	case hasRunning:
 		return "running"
 	default:

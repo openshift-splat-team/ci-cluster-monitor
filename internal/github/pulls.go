@@ -95,6 +95,10 @@ func (c *Client) GetLatestWorkflowRunStatus(
 		runs, resp, err := c.gh.Actions.ListWorkflowRunsByFileName(ctx, owner, repo, wf, opts)
 		if err != nil {
 			klog.Warningf("Failed to list workflow runs for %s workflow %s PR #%d: %v", owner+"/"+repo, wf, pr.Number, err)
+			statuses = append(statuses, WorkflowRunStatus{
+				WorkflowName: wf,
+				Status:       "unavailable",
+			})
 			continue
 		}
 		c.logRateLimit(resp)
