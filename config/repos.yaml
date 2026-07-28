@@ -1,0 +1,38 @@
+repositories:
+  - owner: nutanix-cloud-native
+    name: cluster-api-provider-nutanix
+    workflows:
+      - build-dev.yaml
+      - e2e.yaml
+  - owner: nutanix-cloud-native
+    name: cluster-api-runtime-extensions-nutanix
+    workflows:
+      - checks.yml
+      - e2e.yml
+  - owner: nutanix-cloud-native
+    name: cluster-api-ipam-provider-nutanix
+    workflows:
+      - checks.yml
+  - owner: nutanix-cloud-native
+    name: cloud-provider-nutanix
+    workflows:
+      - build-dev.yaml
+      - e2e.yaml
+  - owner: nutanix-cloud-native
+    name: prism-go-client
+    workflows:
+      - build-lint-test.yml
+
+thresholds:
+  warning_age_days: 7
+  critical_age_days: 14
+  stale_update_days: 3
+
+filters:
+  exclude_drafts: true
+  exclude_labels:
+    - "do-not-merge"
+    - "on-hold"
+  exclude_authors:
+    - "dependabot[bot]"
+    - "renovate[bot]"
