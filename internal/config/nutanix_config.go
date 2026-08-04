@@ -20,8 +20,7 @@ type PrismCentralConfig struct {
 }
 
 type VMFilters struct {
-	NamePrefixes    []string `yaml:"name_prefixes"`
-	CategoryPattern string   `yaml:"category_pattern"`
+	NamePrefixes []string `yaml:"name_prefixes"`
 }
 
 type VMThresholds struct {
@@ -54,9 +53,6 @@ func (c *NutanixConfig) applyDefaults() {
 	}
 	if len(c.VMFilters.NamePrefixes) == 0 {
 		c.VMFilters.NamePrefixes = []string{"ci-op-"}
-	}
-	if c.VMFilters.CategoryPattern == "" {
-		c.VMFilters.CategoryPattern = "kubernetes-io-cluster-"
 	}
 	if c.Thresholds.OrphanTTLHours == 0 {
 		c.Thresholds.OrphanTTLHours = 8

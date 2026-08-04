@@ -73,25 +73,28 @@ func run(configPath, format, credentialsDir string, cleanup, dryRun bool) int {
 		return 1
 	}
 
+	if cleanup && len(report.OrphanedVMs) > 0 {
+		report.CleanupReport = mon.Cleanup(ctx, report.OrphanedVMs, dryRun)
+	}
+
 	switch format {
 	case "json":
 		outputJSON(report)
 	default:
 		outputTable(report)
-	}
-
-	if cleanup && len(report.OrphanedVMs) > 0 {
-		cleanupReport := mon.Cleanup(ctx, report.OrphanedVMs, dryRun)
-		report.CleanupReport = cleanupReport
-
-		if !dryRun {
-			outputCleanupTable(cleanupReport)
-			if cleanupReport.Failed > 0 {
-				return 2
-			}
+		if report.CleanupReport != nil && !dryRun {
+			outputCleanupTable(report.CleanupReport)
 		}
 	}
 
+	if report.CleanupReport != nil {
+		if report.CleanupReport.Failed > 0 {
+			return 2
+		}
+		if report.CleanupReport.Succeeded == len(report.OrphanedVMs) {
+			return 0
+		}
+	}
 	if len(report.OrphanedVMs) > 0 {
 		klog.Infof("Orphaned VMs detected: %d", len(report.OrphanedVMs))
 		return 1

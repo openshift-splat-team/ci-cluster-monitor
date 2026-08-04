@@ -14,7 +14,6 @@ prism_central:
 vm_filters:
   name_prefixes:
     - "ci-op-"
-  category_pattern: "kubernetes-io-cluster-"
 
 thresholds:
   orphan_ttl_hours: 6
@@ -60,9 +59,6 @@ prism_central:
 	}
 	if len(cfg.VMFilters.NamePrefixes) != 1 || cfg.VMFilters.NamePrefixes[0] != "ci-op-" {
 		t.Errorf("expected default name_prefixes [ci-op-], got %v", cfg.VMFilters.NamePrefixes)
-	}
-	if cfg.VMFilters.CategoryPattern != "kubernetes-io-cluster-" {
-		t.Errorf("expected default category_pattern, got %s", cfg.VMFilters.CategoryPattern)
 	}
 	if cfg.Thresholds.OrphanTTLHours != 8 {
 		t.Errorf("expected default orphan_ttl_hours 8, got %d", cfg.Thresholds.OrphanTTLHours)

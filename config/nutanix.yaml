@@ -6,7 +6,6 @@ prism_central:
 vm_filters:
   name_prefixes:
     - "ci-op-"
-  category_pattern: "kubernetes-io-cluster-"
 
 thresholds:
   orphan_ttl_hours: 8
