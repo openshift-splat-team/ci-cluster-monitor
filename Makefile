@@ -9,7 +9,7 @@ help: ## Show this help
 
 .PHONY: build
 build: ## Build pr-monitor binary
-	CGO_ENABLED=0 go build -o bin/pr-monitor ./cmd/pr-monitor
+	CGO_ENABLED=0 go build -mod=mod -o bin/pr-monitor ./cmd/pr-monitor
 
 .PHONY: test
 test: ## Run tests
