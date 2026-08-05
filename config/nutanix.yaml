@@ -1,0 +1,11 @@
+prism_central:
+  endpoint: "prismcentral.sts2-cluster.internal.nutanix-dev.devcluster.openshift.com"
+  port: "9440"
+  insecure: true
+
+vm_filters:
+  name_prefixes:
+    - "ci-op-"
+
+thresholds:
+  orphan_ttl_hours: 8

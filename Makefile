@@ -8,8 +8,9 @@ help: ## Show this help
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n\nTargets:\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 
 .PHONY: build
-build: ## Build pr-monitor binary
+build: ## Build all binaries
 	CGO_ENABLED=0 go build -mod=mod -o bin/pr-monitor ./cmd/pr-monitor
+	CGO_ENABLED=0 go build -mod=mod -o bin/vm-monitor ./cmd/vm-monitor
 
 .PHONY: test
 test: ## Run tests
