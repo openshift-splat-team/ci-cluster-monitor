@@ -34,7 +34,7 @@ thresholds:
 	if !cfg.PrismCentral.Insecure {
 		t.Error("expected insecure true")
 	}
-	if len(cfg.VMFilters.NamePrefixes) != 1 || cfg.VMFilters.NamePrefixes[0] != "ci-op-" {
+	if len(cfg.VMFilters.NamePrefixes) != 1 || cfg.VMFilters.NamePrefixes[0] != DefaultNamePrefix {
 		t.Errorf("expected name_prefixes [ci-op-], got %v", cfg.VMFilters.NamePrefixes)
 	}
 	if cfg.Thresholds.OrphanTTLHours != 6 {
@@ -57,7 +57,7 @@ prism_central:
 	if cfg.PrismCentral.Port != "9440" {
 		t.Errorf("expected default port 9440, got %s", cfg.PrismCentral.Port)
 	}
-	if len(cfg.VMFilters.NamePrefixes) != 1 || cfg.VMFilters.NamePrefixes[0] != "ci-op-" {
+	if len(cfg.VMFilters.NamePrefixes) != 1 || cfg.VMFilters.NamePrefixes[0] != DefaultNamePrefix {
 		t.Errorf("expected default name_prefixes [ci-op-], got %v", cfg.VMFilters.NamePrefixes)
 	}
 	if cfg.Thresholds.OrphanTTLHours != 8 {

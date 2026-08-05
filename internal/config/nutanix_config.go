@@ -7,6 +7,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const DefaultNamePrefix = "ci-op-"
+
 type NutanixConfig struct {
 	PrismCentral PrismCentralConfig `yaml:"prism_central"`
 	VMFilters    VMFilters          `yaml:"vm_filters"`
@@ -52,7 +54,7 @@ func (c *NutanixConfig) applyDefaults() {
 		c.PrismCentral.Port = "9440"
 	}
 	if len(c.VMFilters.NamePrefixes) == 0 {
-		c.VMFilters.NamePrefixes = []string{"ci-op-"}
+		c.VMFilters.NamePrefixes = []string{DefaultNamePrefix}
 	}
 	if c.Thresholds.OrphanTTLHours == 0 {
 		c.Thresholds.OrphanTTLHours = 8

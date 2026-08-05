@@ -20,13 +20,13 @@ const (
 )
 
 type OrphanedVM struct {
-	ExtID       string           `json:"ext_id"`
-	Name        string           `json:"name"`
-	CreateTime  time.Time        `json:"create_time"`
-	Age         time.Duration    `json:"age"`
+	ExtID       string             `json:"ext_id"`
+	Name        string             `json:"name"`
+	CreateTime  time.Time          `json:"create_time"`
+	Age         time.Duration      `json:"age"`
 	PowerState  nutanix.PowerState `json:"power_state"`
-	ClusterName string           `json:"cluster_name"`
-	Status      OrphanStatus     `json:"status"`
+	ClusterName string             `json:"cluster_name"`
+	Status      OrphanStatus       `json:"status"`
 }
 
 type VMReport struct {

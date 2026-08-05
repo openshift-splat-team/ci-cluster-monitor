@@ -62,7 +62,8 @@ func (m *Monitor) Run(ctx context.Context) (*VMReport, error) {
 		}
 	}
 
-	klog.Infof("Found %d CI VMs, %d orphaned (TTL=%dh)", len(allVMs), len(report.OrphanedVMs), m.cfg.Thresholds.OrphanTTLHours)
+	klog.Infof("Found %d CI VMs, %d orphaned (TTL=%dh)",
+		len(allVMs), len(report.OrphanedVMs), m.cfg.Thresholds.OrphanTTLHours)
 	return report, nil
 }
 
@@ -95,7 +96,8 @@ func (m *Monitor) Cleanup(ctx context.Context, orphans []OrphanedVM, dryRun bool
 		report.Results = append(report.Results, result)
 	}
 
-	klog.Infof("Cleanup complete: %d attempted, %d succeeded, %d failed", report.Attempted, report.Succeeded, report.Failed)
+	klog.Infof("Cleanup complete: %d attempted, %d succeeded, %d failed",
+		report.Attempted, report.Succeeded, report.Failed)
 	return report
 }
 
