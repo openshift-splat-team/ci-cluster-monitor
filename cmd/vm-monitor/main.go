@@ -26,14 +26,16 @@ func main() {
 	credentialsDir := flag.String("credentials-dir", "/tmp/secret", "path to directory containing credential files")
 	cleanup := flag.Bool("cleanup", false, "enable deletion of orphaned VMs")
 	dryRun := flag.Bool("dry-run", false, "preview deletions without executing (requires --cleanup)")
+	endpoint := flag.String("endpoint", "", "override prism central endpoint from config")
+	port := flag.String("port", "", "override prism central port from config")
 	flag.Parse()
 
-	exitCode := run(*configPath, *format, *credentialsDir, *cleanup, *dryRun)
+	exitCode := run(*configPath, *format, *credentialsDir, *cleanup, *dryRun, *endpoint, *port)
 	klog.Flush()
 	os.Exit(exitCode)
 }
 
-func run(configPath, format, credentialsDir string, cleanup, dryRun bool) int {
+func run(configPath, format, credentialsDir string, cleanup, dryRun bool, endpoint, port string) int {
 	username, err := readCredentialFile(filepath.Join(credentialsDir, "nutanix-username"))
 	if err != nil {
 		klog.Errorf("Failed to read Nutanix username: %v", err)
@@ -49,6 +51,13 @@ func run(configPath, format, credentialsDir string, cleanup, dryRun bool) int {
 	if err != nil {
 		klog.Errorf("Failed to load configuration: %v", err)
 		return 1
+	}
+
+	if endpoint != "" {
+		cfg.PrismCentral.Endpoint = endpoint
+	}
+	if port != "" {
+		cfg.PrismCentral.Port = port
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
