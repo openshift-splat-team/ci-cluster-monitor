@@ -21,18 +21,18 @@ const (
 )
 
 type VMInfo struct {
-	ExtID            string
-	Name             string
-	CreateTime       time.Time
-	PowerState       PowerState
-	ClusterID        string
-	Categories       []string
-	NumSockets       int
+	ExtID             string
+	Name              string
+	CreateTime        time.Time
+	PowerState        PowerState
+	ClusterID         string
+	Categories        []string
+	NumSockets        int
 	NumCoresPerSocket int
-	MemorySizeBytes  int64
+	MemorySizeBytes   int64
 }
 
-func (v VMInfo) NumVCPUs() int {
+func (v *VMInfo) NumVCPUs() int {
 	return v.NumSockets * v.NumCoresPerSocket
 }
 
