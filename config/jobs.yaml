@@ -1,0 +1,16 @@
+prow:
+  url: "https://prow.ci.openshift.org"
+
+jobs:
+  - name: periodic-ci-openshift-splat-team-ci-cluster-monitor-main-periodics-vm-orphan-monitor
+    component: ci-monitoring
+  - name: periodic-ci-openshift-splat-team-ci-cluster-monitor-main-periodics-capacity-monitor
+    component: ci-monitoring
+  - name: periodic-ci-openshift-splat-team-ci-cluster-monitor-main-periodics-pr-age-monitor
+    component: ci-monitoring
+
+thresholds:
+  pass_rate_warning_percent: 80
+  pass_rate_critical_percent: 60
+  lookback_days: 2
+  min_runs: 3

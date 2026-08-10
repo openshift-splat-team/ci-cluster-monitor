@@ -12,6 +12,7 @@ build: ## Build all binaries
 	CGO_ENABLED=0 go build -mod=mod -o bin/pr-monitor ./cmd/pr-monitor
 	CGO_ENABLED=0 go build -mod=mod -o bin/vm-monitor ./cmd/vm-monitor
 	CGO_ENABLED=0 go build -mod=mod -o bin/capacity-monitor ./cmd/capacity-monitor
+	CGO_ENABLED=0 go build -mod=mod -o bin/job-health-monitor ./cmd/job-health-monitor
 
 .PHONY: test
 test: ## Run tests
