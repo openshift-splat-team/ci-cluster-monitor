@@ -87,18 +87,21 @@ func run(configPath, format, credentialsDir, endpoint, port string) int {
 
 	switch format {
 	case "json":
-		outputJSON(report)
+		if err := outputJSON(report); err != nil {
+			klog.Errorf("Failed to encode JSON: %v", err)
+			return 1
+		}
 	default:
 		outputTable(report)
 	}
 
 	if report.HasCritical() {
 		klog.Infof("Critical capacity thresholds exceeded")
-		return 2
+		return 3
 	}
 	if report.HasWarning() {
 		klog.Infof("Warning capacity thresholds exceeded")
-		return 1
+		return 2
 	}
 	return 0
 }
@@ -198,11 +201,8 @@ func severityRank(s capacitymonitor.Severity) int {
 	}
 }
 
-func outputJSON(report *capacitymonitor.CapacityReport) {
+func outputJSON(report *capacitymonitor.CapacityReport) error {
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetIndent("", "  ")
-	if err := enc.Encode(report); err != nil {
-		klog.Errorf("Failed to encode JSON: %v", err)
-		os.Exit(1)
-	}
+	return enc.Encode(report)
 }

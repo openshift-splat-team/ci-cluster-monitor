@@ -68,11 +68,13 @@ func (m *Monitor) collectClusterCapacity(ctx context.Context, clusterUUID string
 		ciVMs = append(ciVMs, vms...)
 	}
 
+	avgCoreHz := avgHostCoreFrequencyHz(hosts)
+
 	var usedCPUHz, usedMemoryBytes int64
 	for i := range ciVMs {
 		if ciVMs[i].PowerState == nutanix.PowerStateOn {
-			usedCPUHz += estimateVMCPUHz(hosts)
-			usedMemoryBytes += estimateVMMemoryBytes(hosts)
+			usedCPUHz += int64(ciVMs[i].NumVCPUs()) * avgCoreHz
+			usedMemoryBytes += ciVMs[i].MemorySizeBytes
 		}
 	}
 
@@ -96,7 +98,7 @@ func (m *Monitor) collectClusterCapacity(ctx context.Context, clusterUUID string
 
 func buildCPUUsage(totalHz, usedHz int64, thresholds config.CapacityThresholds) ResourceUsage {
 	usedPercent := calcPercent(usedHz, totalHz)
-	freeHz := totalHz - usedHz
+	freeHz := max(totalHz-usedHz, 0)
 
 	return ResourceUsage{
 		TotalHz:     totalHz,
@@ -112,7 +114,7 @@ func buildCPUUsage(totalHz, usedHz int64, thresholds config.CapacityThresholds) 
 
 func buildMemoryUsage(totalBytes, usedBytes int64, thresholds config.CapacityThresholds) ResourceUsage {
 	usedPercent := calcPercent(usedBytes, totalBytes)
-	freeBytes := totalBytes - usedBytes
+	freeBytes := max(totalBytes-usedBytes, 0)
 
 	return ResourceUsage{
 		TotalBytes:  totalBytes,
@@ -152,7 +154,7 @@ func bytesToGiB(b int64) float64 {
 	return float64(b) / (1024 * 1024 * 1024)
 }
 
-func estimateVMCPUHz(hosts []nutanix.HostInfo) int64 {
+func avgHostCoreFrequencyHz(hosts []nutanix.HostInfo) int64 {
 	if len(hosts) == 0 {
 		return 0
 	}
@@ -166,20 +168,4 @@ func estimateVMCPUHz(hosts []nutanix.HostInfo) int64 {
 		return 0
 	}
 	return totalHz / totalCores
-}
-
-func estimateVMMemoryBytes(hosts []nutanix.HostInfo) int64 {
-	if len(hosts) == 0 {
-		return 0
-	}
-	var totalCores int64
-	var totalMem int64
-	for i := range hosts {
-		totalCores += hosts[i].NumberOfCPUCores
-		totalMem += hosts[i].MemorySizeBytes
-	}
-	if totalCores == 0 {
-		return 0
-	}
-	return totalMem / totalCores
 }

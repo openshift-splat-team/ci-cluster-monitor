@@ -21,12 +21,19 @@ const (
 )
 
 type VMInfo struct {
-	ExtID      string
-	Name       string
-	CreateTime time.Time
-	PowerState PowerState
-	ClusterID  string
-	Categories []string
+	ExtID            string
+	Name             string
+	CreateTime       time.Time
+	PowerState       PowerState
+	ClusterID        string
+	Categories       []string
+	NumSockets       int
+	NumCoresPerSocket int
+	MemorySizeBytes  int64
+}
+
+func (v VMInfo) NumVCPUs() int {
+	return v.NumSockets * v.NumCoresPerSocket
 }
 
 type ClusterInfo struct {
@@ -90,6 +97,15 @@ func (c *Client) ListCIVMs(ctx context.Context, namePrefix string) ([]VMInfo, er
 		}
 		if vm.Cluster != nil {
 			info.ClusterID = derefString(vm.Cluster.ExtId)
+		}
+		if vm.NumSockets != nil {
+			info.NumSockets = *vm.NumSockets
+		}
+		if vm.NumCoresPerSocket != nil {
+			info.NumCoresPerSocket = *vm.NumCoresPerSocket
+		}
+		if vm.MemorySizeBytes != nil {
+			info.MemorySizeBytes = *vm.MemorySizeBytes
 		}
 		for _, cat := range vm.Categories {
 			if cat.ExtId != nil {
@@ -194,6 +210,15 @@ func (c *Client) ListCIVMsForCluster(ctx context.Context, clusterUUID, namePrefi
 		}
 		if vm.Cluster != nil {
 			info.ClusterID = derefString(vm.Cluster.ExtId)
+		}
+		if vm.NumSockets != nil {
+			info.NumSockets = *vm.NumSockets
+		}
+		if vm.NumCoresPerSocket != nil {
+			info.NumCoresPerSocket = *vm.NumCoresPerSocket
+		}
+		if vm.MemorySizeBytes != nil {
+			info.MemorySizeBytes = *vm.MemorySizeBytes
 		}
 		results = append(results, info)
 	}

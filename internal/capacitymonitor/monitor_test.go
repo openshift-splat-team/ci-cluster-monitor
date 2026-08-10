@@ -117,7 +117,7 @@ func TestBytesToGiB(t *testing.T) {
 	}
 }
 
-func TestEstimateVMCPUHz(t *testing.T) {
+func TestAvgHostCoreFrequencyHz(t *testing.T) {
 	tests := []struct {
 		name     string
 		hosts    []nutanix.HostInfo
@@ -147,9 +147,9 @@ func TestEstimateVMCPUHz(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := estimateVMCPUHz(tt.hosts)
+			got := avgHostCoreFrequencyHz(tt.hosts)
 			if got != tt.expected {
-				t.Errorf("estimateVMCPUHz() = %d, want %d", got, tt.expected)
+				t.Errorf("avgHostCoreFrequencyHz() = %d, want %d", got, tt.expected)
 			}
 		})
 	}
