@@ -1,0 +1,36 @@
+# Reference config for openshift/release repo.
+# Target path: ci-operator/config/openshift-eng/ci-cluster-monitor/
+# Submit this after the repo moves to github.com/openshift-eng/ci-cluster-monitor.
+build_root:
+  image_stream_tag:
+    name: release
+    namespace: openshift
+    tag: rhel-9-release-golang-1.25-openshift-4.22
+resources:
+  '*':
+    requests:
+      cpu: 100m
+      memory: 256Mi
+tests:
+- as: capacity-monitor
+  commands: |
+    make build
+    ./bin/capacity-monitor --config config/nutanix.yaml --credentials-dir /tmp/secret
+  container:
+    from: src
+  cron: 0 */4 * * *
+  reporter_config:
+    channel: '#forum-ocp-splat-alerts'
+    job_states_to_report:
+    - failure
+    - error
+    report_template: 'Nutanix cluster capacity threshold exceeded. <{{.Status.URL}}|View
+      logs>'
+  secret:
+    mount_path: /tmp/secret
+    name: ci-cluster-monitor-nutanix-creds
+zz_generated_metadata:
+  branch: main
+  org: openshift-eng
+  repo: ci-cluster-monitor
+  variant: periodics

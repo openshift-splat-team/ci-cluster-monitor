@@ -9,3 +9,12 @@ vm_filters:
 
 thresholds:
   orphan_ttl_hours: 8
+
+capacity_monitoring:
+  cluster_uuids:
+    - "000648c3-465d-9bfe-b452-4941f7a3457a"
+  thresholds:
+    cpu_warning_percent: 70
+    cpu_critical_percent: 85
+    memory_warning_percent: 70
+    memory_critical_percent: 85

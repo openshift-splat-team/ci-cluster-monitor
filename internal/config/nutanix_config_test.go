@@ -86,6 +86,28 @@ thresholds:
   orphan_ttl_hours: -1
 `,
 		},
+		{
+			name: "cpu warning >= critical",
+			content: `
+prism_central:
+  endpoint: "pc.example.com"
+capacity_monitoring:
+  thresholds:
+    cpu_warning_percent: 90
+    cpu_critical_percent: 80
+`,
+		},
+		{
+			name: "memory warning >= critical",
+			content: `
+prism_central:
+  endpoint: "pc.example.com"
+capacity_monitoring:
+  thresholds:
+    memory_warning_percent: 90
+    memory_critical_percent: 85
+`,
+		},
 	}
 
 	for _, tt := range tests {
@@ -96,5 +118,72 @@ thresholds:
 				t.Error("expected validation error, got nil")
 			}
 		})
+	}
+}
+
+func TestLoadNutanixCapacityDefaults(t *testing.T) {
+	content := `
+prism_central:
+  endpoint: "pc.example.com"
+`
+	path := writeTestFile(t, content)
+
+	cfg, err := LoadNutanix(path)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if cfg.CapacityMonitoring.CapacityThresholds.CPUWarningPercent != 70 {
+		t.Errorf("expected default cpu_warning_percent 70, got %d",
+			cfg.CapacityMonitoring.CapacityThresholds.CPUWarningPercent)
+	}
+	if cfg.CapacityMonitoring.CapacityThresholds.CPUCriticalPercent != 85 {
+		t.Errorf("expected default cpu_critical_percent 85, got %d",
+			cfg.CapacityMonitoring.CapacityThresholds.CPUCriticalPercent)
+	}
+	if cfg.CapacityMonitoring.CapacityThresholds.MemoryWarningPercent != 70 {
+		t.Errorf("expected default memory_warning_percent 70, got %d",
+			cfg.CapacityMonitoring.CapacityThresholds.MemoryWarningPercent)
+	}
+	if cfg.CapacityMonitoring.CapacityThresholds.MemoryCriticalPercent != 85 {
+		t.Errorf("expected default memory_critical_percent 85, got %d",
+			cfg.CapacityMonitoring.CapacityThresholds.MemoryCriticalPercent)
+	}
+}
+
+func TestLoadNutanixWithCapacityConfig(t *testing.T) {
+	content := `
+prism_central:
+  endpoint: "pc.example.com"
+capacity_monitoring:
+  cluster_uuids:
+    - "uuid-1"
+    - "uuid-2"
+  thresholds:
+    cpu_warning_percent: 60
+    cpu_critical_percent: 80
+    memory_warning_percent: 65
+    memory_critical_percent: 90
+`
+	path := writeTestFile(t, content)
+
+	cfg, err := LoadNutanix(path)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(cfg.CapacityMonitoring.ClusterUUIDs) != 2 {
+		t.Fatalf("expected 2 cluster UUIDs, got %d", len(cfg.CapacityMonitoring.ClusterUUIDs))
+	}
+	if cfg.CapacityMonitoring.ClusterUUIDs[0] != "uuid-1" {
+		t.Errorf("expected uuid-1, got %s", cfg.CapacityMonitoring.ClusterUUIDs[0])
+	}
+	if cfg.CapacityMonitoring.CapacityThresholds.CPUWarningPercent != 60 {
+		t.Errorf("expected cpu_warning_percent 60, got %d",
+			cfg.CapacityMonitoring.CapacityThresholds.CPUWarningPercent)
+	}
+	if cfg.CapacityMonitoring.CapacityThresholds.MemoryCriticalPercent != 90 {
+		t.Errorf("expected memory_critical_percent 90, got %d",
+			cfg.CapacityMonitoring.CapacityThresholds.MemoryCriticalPercent)
 	}
 }
