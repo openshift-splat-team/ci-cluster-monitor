@@ -102,7 +102,7 @@ func buildJobHealth(name, component string, runs []prow.JobRun, thresholds confi
 	health.ConsecutiveFailures = countConsecutiveFailures(runs)
 
 	if len(runs) > 0 {
-		health.LastRunTime = runs[0].StartTime
+		health.LastRunTime = &runs[0].StartTime
 	}
 
 	if health.TotalRuns < thresholds.MinRuns {

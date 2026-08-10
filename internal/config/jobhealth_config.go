@@ -76,6 +76,14 @@ func (c *JobHealthConfig) validateJobHealth() error {
 			return fmt.Errorf("job at index %d has empty name", i)
 		}
 	}
+	if c.Thresholds.PassRateWarningPercent < 1 || c.Thresholds.PassRateWarningPercent > 100 {
+		return fmt.Errorf("pass_rate_warning_percent (%d) must be between 1 and 100",
+			c.Thresholds.PassRateWarningPercent)
+	}
+	if c.Thresholds.PassRateCriticalPercent < 1 || c.Thresholds.PassRateCriticalPercent > 100 {
+		return fmt.Errorf("pass_rate_critical_percent (%d) must be between 1 and 100",
+			c.Thresholds.PassRateCriticalPercent)
+	}
 	if c.Thresholds.PassRateCriticalPercent >= c.Thresholds.PassRateWarningPercent {
 		return fmt.Errorf("pass_rate_critical_percent (%d) must be less than pass_rate_warning_percent (%d)",
 			c.Thresholds.PassRateCriticalPercent, c.Thresholds.PassRateWarningPercent)

@@ -54,13 +54,16 @@ func run(configPath, format, prowURL string) int {
 	}
 
 	switch format {
+	case "table":
+		outputTable(report)
 	case "json":
 		if err := outputJSON(report); err != nil {
 			klog.Errorf("Failed to encode JSON: %v", err)
 			return 1
 		}
 	default:
-		outputTable(report)
+		klog.Errorf("Unsupported output format: %s (supported: table, json)", format)
+		return 1
 	}
 
 	if report.HasCritical() {

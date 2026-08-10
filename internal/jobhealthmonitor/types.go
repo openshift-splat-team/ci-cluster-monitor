@@ -12,15 +12,15 @@ const (
 )
 
 type JobHealth struct {
-	JobName             string    `json:"job_name"`
-	Component           string    `json:"component,omitempty"`
-	TotalRuns           int       `json:"total_runs"`
-	Passed              int       `json:"passed"`
-	Failed              int       `json:"failed"`
-	PassRate            float64   `json:"pass_rate"`
-	Severity            Severity  `json:"severity"`
-	LastRunTime         time.Time `json:"last_run_time"`
-	ConsecutiveFailures int       `json:"consecutive_failures"`
+	JobName             string     `json:"job_name"`
+	Component           string     `json:"component,omitempty"`
+	TotalRuns           int        `json:"total_runs"`
+	Passed              int        `json:"passed"`
+	Failed              int        `json:"failed"`
+	PassRate            float64    `json:"pass_rate"`
+	Severity            Severity   `json:"severity"`
+	LastRunTime         *time.Time `json:"last_run_time,omitempty"`
+	ConsecutiveFailures int        `json:"consecutive_failures"`
 }
 
 type ComponentHealth struct {

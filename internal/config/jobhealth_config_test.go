@@ -104,6 +104,46 @@ thresholds:
   pass_rate_critical_percent: 80
 `,
 		},
+		{
+			name: "warning above 100",
+			content: `
+jobs:
+  - name: test-job
+thresholds:
+  pass_rate_warning_percent: 101
+  pass_rate_critical_percent: 60
+`,
+		},
+		{
+			name: "critical above 100",
+			content: `
+jobs:
+  - name: test-job
+thresholds:
+  pass_rate_warning_percent: 80
+  pass_rate_critical_percent: 101
+`,
+		},
+		{
+			name: "negative warning",
+			content: `
+jobs:
+  - name: test-job
+thresholds:
+  pass_rate_warning_percent: -1
+  pass_rate_critical_percent: 60
+`,
+		},
+		{
+			name: "negative critical",
+			content: `
+jobs:
+  - name: test-job
+thresholds:
+  pass_rate_warning_percent: 80
+  pass_rate_critical_percent: -5
+`,
+		},
 	}
 
 	for _, tt := range tests {
