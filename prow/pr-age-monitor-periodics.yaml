@@ -25,8 +25,8 @@ tests:
     job_states_to_report:
     - failure
     - error
-    report_template: 'PR Age Monitor detected threshold violations. <{{.Status.URL}}|View
-      logs>'
+    report_template: |
+      :red_jenkins_circle: :nutanix: PR Age Monitor detected threshold violations. <{{.Status.URL}}|View logs>
   secret:
     mount_path: /tmp/secret
     name: ci-cluster-monitor-github-token
